@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción de Precio de Laptops</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; padding: 30px 15px; }
+        .container { max-width: 600px; width: 100%; }
+        h1 { text-align: center; color: #1a1a2e; margin-bottom: 5px; font-size: 1.6em; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 25px; font-size: 0.9em; }
+        .card { background: #fff; border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; font-size: 0.9em; }
+        select, input[type="number"], input[type="text"] {
+            width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px;
+            font-size: 0.95em; transition: border-color 0.2s; background: #fafafa;
+        }
+        select:focus, input:focus { outline: none; border-color: #4a6cf7; background: #fff; }
+        .row { display: flex; gap: 14px; }
+        .row .form-group { flex: 1; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin: 16px 0; }
+        .checkbox-group input { width: 18px; height: 18px; }
+        button {
+            width: 100%; padding: 13px; background: #4a6cf7; color: #fff; border: none;
+            border-radius: 8px; font-size: 1.05em; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        button:hover { background: #3a5ce5; }
+        .result {
+            background: linear-gradient(135deg, #4a6cf7, #6a3de8); color: #fff;
+            border-radius: 12px; padding: 25px; text-align: center; margin-top: 20px;
+        }
+        .result .price { font-size: 2.4em; font-weight: 700; }
+        .result .label { font-size: 0.95em; opacity: 0.9; margin-bottom: 5px; }
+        .footer { text-align: center; color: #999; font-size: 0.8em; margin-top: 15px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Predicción de Precio de Laptops</h1>
+    <p class="subtitle">Ingrese las especificaciones del equipo para obtener el precio estimado en euros</p>
+
+    <form method="POST" class="card">
+        <div class="row">
+            <div class="form-group">
+                <label>Marca (Company)</label>
+                <select name="company" required>
+                    {% for c in ['Acer','Apple','Asus','Chuwi','Dell','Fujitsu','Google','HP','Huawei','LG','Lenovo','MSI','Mediacom','Microsoft','Razer','Samsung','Toshiba','Vero','Xiaomi'] %}
+                    <option value="{{c}}">{{c}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tipo (TypeName)</label>
+                <select name="typename" required>
+                    {% for t in ['Notebook','Gaming','Ultrabook','2 in 1 Convertible','Workstation','Netbook'] %}
+                    <option value="{{t}}">{{t}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Sistema Operativo</label>
+                <select name="opsys" required>
+                    {% for o in ['Windows 10','Windows 10 S','Windows 7','Linux','Mac OS X','macOS','Chrome OS','Android','No OS'] %}
+                    <option value="{{o}}">{{o}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>RAM (GB)</label>
+                <select name="ram" required>
+                    {% for r in [2,4,6,8,12,16,24,32,64] %}
+                    <option value="{{r}}" {{'selected' if r==8}}>{{r}} GB</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Pantalla (pulgadas)</label>
+                <input type="number" name="inches" value="15.6" step="0.1" min="10" max="20" required>
+            </div>
+            <div class="form-group">
+                <label>Peso (kg)</label>
+                <input type="number" name="weight" value="2.0" step="0.01" min="0.5" max="5" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Procesador (CPU)</label>
+            <input type="text" name="cpu" placeholder="Ej: Intel Core i7 2.8GHz" value="Intel Core i5 2.5GHz" required>
+        </div>
+
+        <div class="form-group">
+            <label>Tarjeta Gráfica (GPU)</label>
+            <input type="text" name="gpu" placeholder="Ej: Nvidia GeForce GTX 1050" value="Intel HD Graphics 620" required>
+        </div>
+
+        <div class="form-group">
+            <label>Almacenamiento</label>
+            <input type="text" name="memory" placeholder="Ej: 256GB SSD + 1TB HDD" value="256GB SSD" required>
+        </div>
+
+        <div class="form-group">
+            <label>Resolución de Pantalla</label>
+            <select name="resolution" required>
+                {% for r in ['1366x768','1440x900','1600x900','1920x1080','1920x1200','2160x1440','2256x1504','2304x1440','2400x1600','2560x1440','2560x1600','2736x1824','2880x1800','3200x1800','3840x2160'] %}
+                <option value="{{r}}" {{'selected' if r=='1920x1080'}}>{{r}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" name="touchscreen" id="touch">
+            <label for="touch" style="margin:0; font-weight:normal;">Pantalla táctil (Touchscreen)</label>
+        </div>
+
+        <button type="submit">Predecir Precio</button>
+    </form>
+
+    {% if prediction is not none %}
+    <div class="result">
+        <div class="label">Precio estimado</div>
+        <div class="price">€{{ "%.2f"|format(prediction) }}</div>
+    </div>
+    {% endif %}
+
+    <p class="footer">Proyecto de Regresión — CRISP-DM | Luis Angel Hernández Hernández [20230028] | UTHH 2026</p>
+</div>
+</body>
+</html>
