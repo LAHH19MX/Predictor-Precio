@@ -16,37 +16,25 @@ pca = pipeline['pca']
 COLS_CAT = ['Company', 'TypeName', 'OpSys', 'Gpu_Tier', 'Cpu_Tier']
 COLS_NUM = ['Inches', 'Ram_GB', 'Weight_kg', 'Cpu_GHz', 'SSD_GB', 'HDD_GB', 'Resolution']
 
-def parse_cpu_tier(cpu_text):
-    if 'Core i7' in cpu_text: return 'i7'
-    if 'Core i5' in cpu_text: return 'i5'
-    if 'Core i3' in cpu_text: return 'i3'
-    if any(k in cpu_text for k in ['Ryzen', 'FX']): return 'AMD_High'
-    if 'AMD' in cpu_text: return 'AMD_Low'
-    if any(k in cpu_text for k in ['Celeron', 'Pentium', 'Atom']): return 'Budget'
-    return 'Otro'
+CPU_TIER_OPTIONS = {
+    'i7': 'Intel Core i7',
+    'i5': 'Intel Core i5',
+    'i3': 'Intel Core i3',
+    'AMD_High': 'AMD Ryzen / FX (gama alta)',
+    'AMD_Low': 'AMD A-Series / E-Series (gama baja)',
+    'Budget': 'Intel Celeron / Pentium / Atom (económico)',
+    'Otro': 'Otro (Xeon, Core M, etc.)',
+}
 
-def parse_gpu_tier(gpu_text):
-    if any(k in gpu_text for k in ['GTX', 'RTX', 'Quadro', 'Tesla', 'Titan', 'Radeon Pro', 'Radeon R9', 'Radeon RX', 'FirePro']):
-        return 'High'
-    if any(k in gpu_text for k in ['Nvidia', 'Iris']):
-        return 'Mid'
-    if 'AMD' in gpu_text:
-        return 'Low'
-    return 'Integrated'
+GPU_TIER_OPTIONS = {
+    'Integrated': 'Integrada (Intel HD / UHD Graphics)',
+    'Mid': 'Gama media (Nvidia MX / Intel Iris)',
+    'Low': 'Gama baja (AMD Radeon)',
+    'High': 'Gama alta (Nvidia GTX/RTX, AMD Radeon Pro/RX, Quadro)',
+}
 
-def parse_storage(memory_text):
-    ssd, hdd = 0, 0
-    for parte in memory_text.split('+'):
-        m = re.search(r'([\d.]+)(TB|GB)', parte.strip())
-        if m:
-            val = float(m.group(1))
-            if m.group(2) == 'TB':
-                val *= 1024
-            if 'SSD' in parte or 'Flash' in parte:
-                ssd += val
-            else:
-                hdd += val
-    return ssd, hdd
+SSD_OPTIONS = [0, 8, 16, 32, 64, 128, 180, 240, 256, 512, 768, 1024]
+HDD_OPTIONS = [0, 32, 128, 500, 1024, 2048]
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -58,17 +46,13 @@ def index():
         inches = float(request.form['inches'])
         ram_gb = int(request.form['ram'])
         weight_kg = float(request.form['weight'])
-        cpu_text = request.form['cpu']
-        gpu_text = request.form['gpu']
-        memory_text = request.form['memory']
+        cpu_ghz = float(request.form['cpu_ghz'])
+        cpu_tier = request.form['cpu_tier']
+        gpu_tier = request.form['gpu_tier']
+        ssd_gb = int(request.form['ssd'])
+        hdd_gb = int(request.form['hdd'])
         resolution = request.form['resolution']
         touchscreen = 1 if request.form.get('touchscreen') else 0
-
-        cpu_ghz_match = re.search(r'(\d+\.?\d*)GHz', cpu_text)
-        cpu_ghz = float(cpu_ghz_match.group(1)) if cpu_ghz_match else 2.5
-        cpu_tier = parse_cpu_tier(cpu_text)
-        gpu_tier = parse_gpu_tier(gpu_text)
-        ssd_gb, hdd_gb = parse_storage(memory_text)
 
         res_match = re.match(r'(\d+)x(\d+)', resolution)
         res_pixels = int(res_match.group(1)) * int(res_match.group(2)) if res_match else 1920 * 1080
@@ -99,7 +83,9 @@ def index():
         pred = modelo.predict(row_pca)[0]
         prediction = round(pred, 2)
 
-    return render_template('index.html', prediction=prediction)
+    return render_template('index.html', prediction=prediction,
+                            cpu_tiers=CPU_TIER_OPTIONS, gpu_tiers=GPU_TIER_OPTIONS,
+                            ssd_options=SSD_OPTIONS, hdd_options=HDD_OPTIONS)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

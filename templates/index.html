@@ -91,19 +91,47 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Procesador (CPU)</label>
-            <input type="text" name="cpu" placeholder="Ej: Intel Core i7 2.8GHz" value="Intel Core i5 2.5GHz" required>
+        <div class="row">
+            <div class="form-group">
+                <label>Gama del Procesador (CPU)</label>
+                <select name="cpu_tier" required>
+                    {% for key, label in cpu_tiers.items() %}
+                    <option value="{{key}}" {{'selected' if key=='i5'}}>{{label}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Velocidad CPU (GHz)</label>
+                <input type="number" name="cpu_ghz" value="2.5" step="0.1" min="0.9" max="3.6" required>
+            </div>
         </div>
 
         <div class="form-group">
             <label>Tarjeta Gráfica (GPU)</label>
-            <input type="text" name="gpu" placeholder="Ej: Nvidia GeForce GTX 1050" value="Intel HD Graphics 620" required>
+            <select name="gpu_tier" required>
+                {% for key, label in gpu_tiers.items() %}
+                <option value="{{key}}" {{'selected' if key=='Integrated'}}>{{label}}</option>
+                {% endfor %}
+            </select>
         </div>
 
-        <div class="form-group">
-            <label>Almacenamiento</label>
-            <input type="text" name="memory" placeholder="Ej: 256GB SSD + 1TB HDD" value="256GB SSD" required>
+        <div class="row">
+            <div class="form-group">
+                <label>Almacenamiento SSD (GB)</label>
+                <select name="ssd" required>
+                    {% for s in ssd_options %}
+                    <option value="{{s}}" {{'selected' if s==256}}>{{s}} GB{{' (sin SSD)' if s==0}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Almacenamiento HDD (GB)</label>
+                <select name="hdd" required>
+                    {% for h in hdd_options %}
+                    <option value="{{h}}" {{'selected' if h==0}}>{{h}} GB{{' (sin HDD)' if h==0}}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
